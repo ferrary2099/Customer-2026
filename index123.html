@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroCare - ลงทะเบียนรับประกันและสิทธิพิเศษเครื่องปรับอากาศ</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Prompt & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom smooth transition and selection styles */
+    .option-card.selected {
+      border-color: #0284c7;
+      background-color: #f0f9ff;
+      box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.15);
+    }
+    .step-active {
+      background-color: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+    }
+    .step-done {
+      background-color: #10b981;
+      color: #ffffff;
+      border-color: #10b981;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-sky-200">
+
+  <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+          <!-- Snowflake / Cool Air icon -->
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m0-18l-3 3m3-3l3 3m-3 15l-3-3m3 3l3-3m9-6H3m18 0l-3-3m3 3l-3 3M3 12l3-3M3 12l3 3" />
+          </svg>
+        </div>
+        <div>
+          <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-700 to-cyan-600">AeroCare</span>
+          <span class="text-xs ml-1.5 px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-medium">Customer Portal</span>
+        </div>
+      </div>
+
+      <!-- Quick Action / Live Data Counter -->
+      <div class="flex items-center gap-3">
+        <button id="viewRecordsBtn" class="text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 bg-slate-100 hover:bg-sky-50 px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>ดูข้อมูลที่จัดเก็บ (<span id="submissionCountBadge">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="relative overflow-hidden bg-gradient-to-b from-sky-100/60 via-sky-50/30 to-slate-50 pt-8 pb-10 sm:pt-12 sm:pb-14 border-b border-sky-100">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-200 text-sky-800 text-xs sm:text-sm font-medium mb-4 animate-pulse">
+        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+        สิทธิพิเศษสำหรับผู้ซื้อเครื่องปรับอากาศรุ่นใหม่
+      </div>
+      <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+        ลงทะเบียนเปิดใช้งานการรับประกัน<br class="hidden sm:inline" />
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-teal-500">รับฟรี! ขยายเวลารับประกันเพิ่ม 1 ปี</span>
+      </h1>
+      <p class="mt-3.5 sm:mt-4 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        กรอกข้อมูลเพื่อบันทึกประวัติการติดตั้ง พร้อมรับสิทธิ์บริการตรวจเช็กและล้างแอร์ฟรีก่อนฤดูร้อน ข้อมูลของท่านช่วยให้เราบริการได้อย่างรวดเร็วและตรงใจยิ่งขึ้น
+      </p>
+
+      <!-- Trust Badges -->
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-slate-600 font-medium">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span>รับประกันคอมเพรสเซอร์มาตรฐาน</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+          <span>ข้อมูลปลอดภัยตามมาตรฐาน PDPA</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          <span>บริการช่างผู้ชำนาญการตลอด 24 ชม.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="max-w-3xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8 mb-16 w-full flex-grow relative z-10">
+    <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/70 border border-slate-200/80 overflow-hidden">
+
+      <!-- Step Indicator -->
+      <div class="border-b border-slate-100 bg-slate-50/70 px-4 sm:px-8 py-4">
+        <div class="flex items-center justify-between max-w-lg mx-auto">
+          <!-- Step 1 -->
+          <div class="flex items-center gap-2">
+            <span id="stepBadge1" class="w-8 h-8 rounded-full border-2 border-sky-600 bg-sky-600 text-white flex items-center justify-center text-sm font-semibold transition-all">1</span>
+            <span class="text-xs sm:text-sm font-medium text-slate-800 hidden sm:inline">ข้อมูลลูกค้า</span>
+          </div>
+          <div class="w-8 sm:w-16 h-0.5 bg-slate-200" id="stepConnector1"></div>
+
+          <!-- Step 2 -->
+          <div class="flex items-center gap-2">
+            <span id="stepBadge2" class="w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-500 flex items-center justify-center text-sm font-semibold transition-all">2</span>
+            <span class="text-xs sm:text-sm font-medium text-slate-500 hidden sm:inline">การซื้อ & จุดจำหน่าย</span>
+          </div>
+          <div class="w-8 sm:w-16 h-0.5 bg-slate-200" id="stepConnector2"></div>
+
+          <!-- Step 3 -->
+          <div class="flex items-center gap-2">
+            <span id="stepBadge3" class="w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-500 flex items-center justify-center text-sm font-semibold transition-all">3</span>
+            <span class="text-xs sm:text-sm font-medium text-slate-500 hidden sm:inline">เหตุผลการตัดสินใจ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Body -->
+      <form id="endUserForm" class="p-6 sm:p-8 space-y-6">
+
+        <!-- STEP 1: Personal Details -->
+        <div id="stepSection1" class="space-y-6">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-sky-100 text-sky-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              </span>
+              ข้อมูลผู้ครอบครองเครื่องปรับอากาศ
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">ใช้สำหรับออกเอกสารใบรับประกันอิเล็กทรอนิกส์ (E-Warranty) และการติดต่อประสานงานซ่อมบำรุง</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <!-- Full Name -->
+            <div class="sm:col-span-2">
+              <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1.5">
+                ชื่อ - นามสกุล <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <input type="text" id="fullName" name="fullName" required placeholder="เช่น นายสมชาย ใจดี"
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400">
+              </div>
+              <span class="text-xs text-rose-500 hidden mt-1" id="err-fullName">กรุณากรอกชื่อและนามสกุล</span>
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+              <label for="phoneNumber" class="block text-sm font-medium text-slate-700 mb-1.5">
+                เบอร์โทรศัพท์มือถือ <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="12" placeholder="เช่น 081-234-5678"
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400">
+              </div>
+              <span class="text-xs text-slate-400 mt-1 block">สำหรับรับ SMS ยืนยันรหัสรับประกัน</span>
+              <span class="text-xs text-rose-500 hidden mt-1" id="err-phoneNumber">กรุณากรอกเบอร์โทรศัพท์ 10 หลักที่ถูกต้อง</span>
+            </div>
+
+            <!-- Email (Optional for E-Warranty) -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-slate-700 mb-1.5">
+                อีเมล (เพื่อรับสำเนาบัตรรับประกัน) <span class="text-slate-400 font-normal">(ถ้ามี)</span>
+              </label>
+              <input type="email" id="email" name="email" placeholder="example@email.com"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400">
+            </div>
+
+            <!-- Installation Province -->
+            <div class="sm:col-span-2">
+              <label for="installProvince" class="block text-sm font-medium text-slate-700 mb-1.5">
+                จังหวัดที่ติดตั้งเครื่องปรับอากาศ <span class="text-rose-500">*</span>
+              </label>
+              <select id="installProvince" name="installProvince" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition bg-white text-slate-700">
+                <option value="">-- กรุณาเลือกจังหวัด --</option>
+                <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                <option value="นนทบุรี">นนทบุรี</option>
+                <option value="ปทุมธานี">ปทุมธานี</option>
+                <option value="สมุทรปราการ">สมุทรปราการ</option>
+                <option value="เชียงใหม่">เชียงใหม่</option>
+                <option value="ขอนแก่น">ขอนแก่น</option>
+                <option value="ชลบุรี">ชลบุรี</option>
+                <option value="นครราชสีมา">นครราชสีมา</option>
+                <option value="สงขลา">สงขลา</option>
+                <option value="ภูเก็ต">ภูเก็ต</option>
+                <option value="จังหวัดอื่นๆ">จังหวัดอื่นๆ</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Step 1 Navigation -->
+          <div class="pt-4 flex justify-end">
+            <button type="button" id="btnNext1"
+              class="w-full sm:w-auto px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-md shadow-sky-600/20">
+              ถัดไป: ข้อมูลการซื้อแอร์
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Purchase Details & Store Location -->
+        <div id="stepSection2" class="space-y-6 hidden">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-teal-100 text-teal-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+              </span>
+              ข้อมูลการซื้อแอร์ & สถานที่ซื้อ
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">รายละเอียดเครื่องและแหล่งจัดจำหน่ายเพื่อเชื่อมโยงกับระบบประกันศูนย์</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <!-- Brand / Model -->
+            <div>
+              <label for="acBrandModel" class="block text-sm font-medium text-slate-700 mb-1.5">
+                ยี่ห้อ / รุ่นเครื่องปรับอากาศ <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="acBrandModel" name="acBrandModel" required placeholder="เช่น Daikin Inverter FTKQ-Y / Mitsubishi Mr.Slim"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400">
+              <span class="text-xs text-rose-500 hidden mt-1" id="err-acBrandModel">กรุณาระบุยี่ห้อหรือรุ่น</span>
+            </div>
+
+            <!-- BTU Capacity -->
+            <div>
+              <label for="acBtu" class="block text-sm font-medium text-slate-700 mb-1.5">
+                ขนาดบีทียู (BTU) <span class="text-rose-500">*</span>
+              </label>
+              <select id="acBtu" name="acBtu" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition bg-white text-slate-700">
+                <option value="">-- เลือกขนาด BTU --</option>
+                <option value="9,000 BTU (สำหรับห้อง 9-14 ตร.ม.)">9,000 BTU (สำหรับห้อง 9-14 ตร.ม.)</option>
+                <option value="12,000 BTU (สำหรับห้อง 14-20 ตร.ม.)">12,000 BTU (สำหรับห้อง 14-20 ตร.ม.)</option>
+                <option value="15,000 - 18,000 BTU (สำหรับห้อง 20-28 ตร.ม.)">15,000 - 18,000 BTU (สำหรับห้อง 20-28 ตร.ม.)</option>
+                <option value="24,000 BTU (สำหรับห้อง 28-36 ตร.ม.)">24,000 BTU (สำหรับห้อง 28-36 ตร.ม.)</option>
+                <option value="มากกว่า 24,000 BTU">มากกว่า 24,000 BTU</option>
+              </select>
+            </div>
+
+            <!-- Purchase Date -->
+            <div>
+              <label for="purchaseDate" class="block text-sm font-medium text-slate-700 mb-1.5">
+                วันที่ซื้อแอร์ (ตามใบเสร็จ) <span class="text-rose-500">*</span>
+              </label>
+              <input type="date" id="purchaseDate" name="purchaseDate" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition bg-white text-slate-700">
+              <span class="text-xs text-rose-500 hidden mt-1" id="err-purchaseDate">กรุณาระบุวันที่ซื้อ</span>
+            </div>
+
+            <!-- Serial Number (Optional) -->
+            <div>
+              <label for="serialNumber" class="block text-sm font-medium text-slate-700 mb-1.5">
+                หมายเลขเครื่อง / Serial Number <span class="text-slate-400 font-normal">(ถ้ามี)</span>
+              </label>
+              <input type="text" id="serialNumber" name="serialNumber" placeholder="ดูข้างตัวเครื่อง เช่น SN-98234-A"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400">
+            </div>
+
+            <!-- Purchase Channel / Location Category -->
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                ประเภทสถานที่ซื้อ <span class="text-rose-500">*</span>
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="storeTypeContainer">
+                <button type="button" data-store-type="โมเดิร์นเทรด (HomePro / PowerBuy / ไทวัสดุ)" class="store-type-btn p-3 rounded-xl border border-slate-200 text-left hover:border-sky-400 text-xs sm:text-sm font-medium transition flex flex-col gap-1 bg-slate-50">
+                  <span class="text-base">🏬</span>
+                  <span class="font-semibold text-slate-800">ห้างโมเดิร์นเทรด</span>
+                  <span class="text-[11px] text-slate-500">HomePro, Power Buy</span>
+                </button>
+                <button type="button" data-store-type="ร้านตัวแทนจำหน่ายแอร์ / ดีลเลอร์ท้องถิ่น" class="store-type-btn p-3 rounded-xl border border-slate-200 text-left hover:border-sky-400 text-xs sm:text-sm font-medium transition flex flex-col gap-1 bg-slate-50">
+                  <span class="text-base">🏪</span>
+                  <span class="font-semibold text-slate-800">ร้านแอร์ใกล้บ้าน</span>
+                  <span class="text-[11px] text-slate-500">ตัวแทนจำหน่าย / ดีลเลอร์</span>
+                </button>
+                <button type="button" data-store-type="ออนไลน์ (Shopee / Lazada / TikTok Shop)" class="store-type-btn p-3 rounded-xl border border-slate-200 text-left hover:border-sky-400 text-xs sm:text-sm font-medium transition flex flex-col gap-1 bg-slate-50">
+                  <span class="text-base">📱</span>
+                  <span class="font-semibold text-slate-800">แอปออนไลน์</span>
+                  <span class="text-[11px] text-slate-500">Shopee, Lazada, TikTok</span>
+                </button>
+                <button type="button" data-store-type="โครงการบ้าน / คอนโดแถมมาให้" class="store-type-btn p-3 rounded-xl border border-slate-200 text-left hover:border-sky-400 text-xs sm:text-sm font-medium transition flex flex-col gap-1 bg-slate-50">
+                  <span class="text-base">🏢</span>
+                  <span class="font-semibold text-slate-800">แถมจากโครงการ</span>
+                  <span class="text-[11px] text-slate-500">บ้านจัดสรร / คอนโด</span>
+                </button>
+              </div>
+              <input type="hidden" id="purchaseStoreType" name="purchaseStoreType" required>
+              <span class="text-xs text-rose-500 hidden mt-1" id="err-purchaseStoreType">กรุณาเลือกประเภทสถานที่ซื้อ</span>
+            </div>
+
+            <!-- Specific Store Name / Branch -->
+            <div class="sm:col-span-2">
+              <label for="purchaseLocationDetail" class="block text-sm font-medium text-slate-700 mb-1.5">
+                ระบุชื่อร้านค้า / สาขา หรือชื่อร้านออนไลน์ <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="purchaseLocationDetail" name="purchaseLocationDetail" required placeholder="เช่น HomePro สาขาพระราม 9, ร้าน แอร์บ้านสมุทรปราการการช่าง, หรือร้าน Daikin Official บน Shopee"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400">
+              <span class="text-xs text-rose-500 hidden mt-1" id="err-purchaseLocationDetail">กรุณาระบุชื่อร้านหรือสาขา</span>
+            </div>
+          </div>
+
+          <!-- Step 2 Navigation -->
+          <div class="pt-4 flex items-center justify-between gap-3">
+            <button type="button" id="btnBack2"
+              class="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-sm font-medium transition">
+              ย้อนกลับ
+            </button>
+            <button type="button" id="btnNext2"
+              class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-md shadow-sky-600/20">
+              ถัดไป: เหตุผลการเลือกซื้อ
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Reasons for Purchasing & Submission -->
+        <div id="stepSection3" class="space-y-6 hidden">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-amber-100 text-amber-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+              </span>
+              เหตุผลการตัดสินใจซื้อแอร์เครื่องนี้
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">เลือกได้มากกว่า 1 ข้อ ข้อมูลนี้จะนำไปพัฒนาผลิตภัณฑ์และโปรโมชั่นให้ดียิ่งขึ้น</p>
+          </div>
+
+          <!-- Reason Grid (Interactive Pill Cards) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="reasonsGrid">
+            <!-- Reason Option 1 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="ประหยัดไฟ / ได้เบอร์ 5 หลายดาว (Inverter)" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">⚡ ประหยัดไฟ ค่าไฟถูก (Inverter เบอร์ 5)</span>
+                <span class="text-xs text-slate-500">ต้องการลดภาระค่าไฟฟ้ารายเดือน</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 2 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="ฟอกอากาศ / กรองฝุ่น PM2.5 / ฆ่าเชื้อโรค" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">🍃 ฟอกอากาศ & กรองฝุ่น PM 2.5</span>
+                <span class="text-xs text-slate-500">เพื่อสุขภาพของเด็ก ผู้สูงอายุ หรือผู้มีภูมิแพ้</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 3 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="โปรโมชั่นคุ้มค่า / ลดราคา / ผ่อน 0%" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">🏷️ โปรโมชั่นโดนใจ & ผ่อน 0%</span>
+                <span class="text-xs text-slate-500">มีส่วนลดพิเศษ แถมบริการติดตั้ง หรือผ่อนยาว</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 4 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="ความเงียบ / ไม่รบกวนการนอน" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">🌙 ทำงานเงียบสนิท ไม่รบกวนการนอน</span>
+                <span class="text-xs text-slate-500">เน้นติดตั้งในห้องนอน หรือห้องทำงานที่ต้องการความสงบ</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 5 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="ความน่าเชื่อถือของแบรนด์ / ความทนทาน" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">🛡️ แบรนด์มีความน่าเชื่อถือ ทนทาน</span>
+                <span class="text-xs text-slate-500">เคยใช้งานแล้วประทับใจ หรือมีชื่อเสียงยาวนาน</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 6 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="เพื่อน ช่างติดตั้ง หรือคนรู้จักแนะนำ" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">👥 มีผู้แนะนำ (ช่างติดตั้ง / ญาติมิตร)</span>
+                <span class="text-xs text-slate-500">ช่างแอร์แนะนำ หรืออ่านรีวิวทาง Pantip/YouTube</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 7 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="ฟังก์ชันสั่งงานผ่าน Wi-Fi / มือถือ" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">📶 สั่งเปิดแอร์ผ่านมือถือ (Smart Wi-Fi)</span>
+                <span class="text-xs text-slate-500">เปิดแอร์ก่อนกลับถึงบ้าน ตรวจดูการกินไฟได้</span>
+              </div>
+            </label>
+
+            <!-- Reason Option 8 -->
+            <label class="reason-card border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-sky-400 transition bg-slate-50/50">
+              <input type="checkbox" name="purchaseReasons" value="แอร์เก่าชำรุด / ต้องเปลี่ยนเร่งด่วน" class="mt-1 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <div>
+                <span class="text-sm font-semibold text-slate-800 block">🔧 แอร์ตัวเดิมเสีย / ต้องการเปลี่ยนทันที</span>
+                <span class="text-xs text-slate-500">เครื่องเดิมซ่อมไม่คุ้ม หรืออากาศร้อนทนไม่ไหว</span>
+              </div>
+            </label>
+          </div>
+
+          <span class="text-xs text-rose-500 hidden" id="err-purchaseReasons">กรุณาเลือกเหตุผลในการตัดสินใจอย่างน้อย 1 ข้อ</span>
+
+          <!-- Additional Comments -->
+          <div>
+            <label for="otherFeedback" class="block text-sm font-medium text-slate-700 mb-1.5">
+              ข้อเสนอแนะเพิ่มเติม หรือเหตุผลอื่นๆ <span class="text-slate-400 font-normal">(ไม่บังคับ)</span>
+            </label>
+            <textarea id="otherFeedback" name="otherFeedback" rows="2" placeholder="เช่น บริการช่างติดตั้งดีมาก, อยากให้มีฟังก์ชันทำความสะอาดอัตโนมัติ ฯลฯ"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition placeholder:text-slate-400"></textarea>
+          </div>
+
+          <!-- PDPA Consent Card -->
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" id="pdpaConsent" required class="mt-0.5 w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+              <span class="leading-relaxed">
+                <strong class="text-slate-800">ยินยอมให้จัดเก็บข้อมูล:</strong> ข้าพเจ้ายินยอมให้ใช้ข้อมูลนี้เพื่อการลงทะเบียนรับประกันตัวเครื่อง การติดต่อแจ้งเตือนการล้างแอร์ และการนำเสนอข้อมูลสิทธิประโยชน์ตามนโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+              </span>
+            </label>
+            <span class="text-xs text-rose-500 hidden block" id="err-pdpaConsent">กรุณากดให้ความยินยอมก่อนส่งข้อมูล</span>
+          </div>
+
+          <!-- Step 3 Navigation -->
+          <div class="pt-4 flex items-center justify-between gap-3">
+            <button type="button" id="btnBack3"
+              class="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-sm font-medium transition">
+              ย้อนกลับ
+            </button>
+            <button type="submit" id="btnSubmit"
+              class="px-8 py-3 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-sky-600/30">
+              <span>ยืนยันการลงทะเบียนรับสิทธิ์</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Features / Why register banner -->
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-slate-800">ขยายเวลารับประกัน</div>
+          <div class="text-xs text-slate-500">เพิ่มฟรี 1 ปีเต็มจากมาตรฐาน</div>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-slate-800">ลุ้นรับบริการล้างแอร์ฟรี</div>
+          <div class="text-xs text-slate-500">แจกทุกเดือนกว่า 100 รางวัล</div>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-slate-800">เตือนล้างแอร์อัตโนมัติ</div>
+          <div class="text-xs text-slate-500">แจ้งเตือนผ่าน SMS ทุก 6 เดือน</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: Success E-Warranty Card -->
+  <div id="successModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-sky-600 to-teal-600 p-6 text-white text-center relative">
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <h3 class="text-xl font-bold">ลงทะเบียนสำเร็จเรียบร้อย!</h3>
+        <p class="text-xs sm:text-sm text-sky-100 mt-1">รับสิทธิ์ขยายการรับประกันเพิ่ม 1 ปี เรียบร้อยแล้ว</p>
+      </div>
+
+      <!-- Warranty Card Mockup -->
+      <div class="p-6 space-y-4">
+        <div class="bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
+          <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-sky-500/20 rounded-full blur-2xl"></div>
+          
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div>
+              <span class="text-xs font-light tracking-widest text-sky-300">DIGITAL WARRANTY CARD</span>
+              <div class="text-sm font-bold text-white tracking-wide" id="certBrandModel">Daikin Inverter FTKQ</div>
+            </div>
+            <span class="text-xs px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono">ACTIVE</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4 text-xs">
+            <div>
+              <span class="text-slate-400 block">ชื่อเจ้าของเครื่อง</span>
+              <span class="font-semibold text-slate-100" id="certOwnerName">สมชาย ใจดี</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">เบอร์โทรศัพท์</span>
+              <span class="font-semibold text-slate-100" id="certPhone">081-234-5678</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">สถานที่ซื้อ</span>
+              <span class="font-semibold text-slate-100 truncate block" id="certStore">HomePro พระราม 9</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">ระยะเวลาคุ้มครอง</span>
+              <span class="font-semibold text-amber-300" id="certExpire">2 ปีเต็ม (+1 ปี โบนัส)</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>REG ID: <span id="certRegId" class="text-white">AC-849204</span></span>
+            <span class="text-teal-300">AeroCare Certified</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-center text-slate-500">
+          เราได้ส่ง SMS ยืนยันสิทธิ์ไปยังเบอร์โทรศัพท์ของท่านเรียบร้อยแล้ว<br />
+          สามารถใช้รหัสนี้เมื่อแจ้งเคลมหรือเรียกล้างแอร์ได้ทันที
+        </p>
+
+        <div class="flex gap-2">
+          <button id="closeModalBtn" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition">
+            เสร็จสิ้น
+          </button>
+          <button id="viewDataDirectBtn" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-semibold transition">
+            เปิดดูรายการจัดเก็บ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Admin / Marketer Data Preview Drawer -->
+  <div id="recordsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+      
+      <!-- Drawer Header -->
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            📊 ข้อมูล End-User ที่จัดเก็บได้ (Customer Records)
+          </h3>
+          <p class="text-xs text-slate-500">แสดงผลข้อมูลลูกค้า ชื่อ, เบอร์โทร, ข้อมูลการซื้อ, สถานที่ซื้อ และเหตุผลที่ลูกค้าตัดสินใจซื้อ</p>
+        </div>
+        <button id="closeRecordsModalBtn" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Drawer Content -->
+      <div class="p-5 overflow-y-auto flex-grow custom-scrollbar space-y-4">
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="p-3 bg-sky-50 border border-sky-100 rounded-xl">
+            <div class="text-xs text-sky-600 font-medium">จำนวนผู้ลงทะเบียน</div>
+            <div class="text-xl font-bold text-sky-900" id="statTotalUsers">0</div>
+          </div>
+          <div class="p-3 bg-teal-50 border border-teal-100 rounded-xl">
+            <div class="text-xs text-teal-600 font-medium">เหตุผลยอดนิยม</div>
+            <div class="text-sm font-bold text-teal-900 truncate" id="statTopReason">-</div>
+          </div>
+          <div class="p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
+            <div class="text-xs text-indigo-600 font-medium">ช่องทางยอดฮิต</div>
+            <div class="text-sm font-bold text-indigo-900 truncate" id="statTopChannel">-</div>
+          </div>
+          <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+            <div class="text-xs text-amber-600 font-medium">ความยินยอม PDPA</div>
+            <div class="text-xl font-bold text-amber-900">100%</div>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
+          <table class="w-full text-left text-xs text-slate-700 min-w-[650px]">
+            <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200 uppercase text-[11px]">
+              <tr>
+                <th class="p-3">เวลาที่ลง</th>
+                <th class="p-3">ชื่อ - เบอร์โทร</th>
+                <th class="p-3">ข้อมูลแอร์ (รุ่น/BTU)</th>
+                <th class="p-3">สถานที่ซื้อ</th>
+                <th class="p-3">เหตุผลการตัดสินใจซื้อ</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTableBody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated or empty -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="noRecordsState" class="text-center py-10 text-slate-400">
+          <svg class="w-12 h-12 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+          <p class="text-sm font-medium">ยังไม่มีข้อมูลในระบบ ลองกรอกฟอร์มเพื่อทดสอบได้ทันที</p>
+        </div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span>จำลองการจัดเก็บข้อมูลผ่าน LocalStorage บนเบราว์เซอร์</span>
+        <button id="clearRecordsBtn" class="text-rose-600 hover:text-rose-700 font-medium hover:underline">
+          ล้างข้อมูลทดสอบทั้งหมด
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Message -->
+  <div id="toastMessage" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs sm:text-sm px-4 py-3 rounded-xl shadow-xl transition-all duration-300 transform translate-y-20 opacity-0 flex items-center gap-2">
+    <span id="toastIcon">✨</span>
+    <span id="toastText">ข้อความแจ้งเตือน</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'aerocare_enduser_leads';
+    let currentStep = 1;
+    let selectedStoreType = '';
+
+    // Sample initial demo record for immediate visual delight if empty
+    function initializeDemoData() {
+      const existing = localStorage.getItem(STORAGE_KEY);
+      if (!existing) {
+        const demoData = [
+          {
+            id: 'AC-' + Math.floor(100000 + Math.random() * 900000),
+            timestamp: new Date(Date.now() - 3600000 * 5).toLocaleString('th-TH'),
+            fullName: 'คุณกิตติศักดิ์ พัฒนากุล',
+            phoneNumber: '089-456-7890',
+            email: 'kittisak.p@gmail.com',
+            installProvince: 'กรุงเทพมหานคร',
+            acBrandModel: 'Daikin Inverter Max Inverter',
+            acBtu: '12,000 BTU (สำหรับห้อง 14-20 ตร.ม.)',
+            purchaseDate: '2026-09-18',
+            serialNumber: 'SN-DK-893021',
+            purchaseStoreType: 'โมเดิร์นเทรด (HomePro / PowerBuy / ไทวัสดุ)',
+            purchaseLocationDetail: 'HomePro สาขารามคำแหง',
+            purchaseReasons: ['ประหยัดไฟ / ได้เบอร์ 5 หลายดาว (Inverter)', 'ความน่าเชื่อถือของแบรนด์ / ความทนทาน'],
+            otherFeedback: 'ช่างแนะนำดี ติดตั้งเรียบร้อย'
+          },
+          {
+            id: 'AC-' + Math.floor(100000 + Math.random() * 900000),
+            timestamp: new Date(Date.now() - 3600000 * 20).toLocaleString('th-TH'),
+            fullName: 'คุณพัชราภรณ์ วงศ์สวัสดิ์',
+            phoneNumber: '081-998-3321',
+            email: 'patcha.w@hotmail.com',
+            installProvince: 'เชียงใหม่',
+            acBrandModel: 'Carrier Color Smart',
+            acBtu: '18,000 BTU (สำหรับห้อง 20-28 ตร.ม.)',
+            purchaseDate: '2026-09-15',
+            serialNumber: 'CR-90412-M',
+            purchaseStoreType: 'ออนไลน์ (Shopee / Lazada / TikTok Shop)',
+            purchaseLocationDetail: 'Shopee Carrier Official Store',
+            purchaseReasons: ['ฟอกอากาศ / กรองฝุ่น PM2.5 / ฆ่าเชื้อโรค', 'โปรโมชั่นคุ้มค่า / ลดราคา / ผ่อน 0%', 'ฟังก์ชันสั่งงานผ่าน Wi-Fi / มือถือ'],
+            otherFeedback: 'เชียงใหม่ฝุ่นเยอะ อยากได้แอร์ที่กรอง PM2.5 ได้จริง'
+          }
+        ];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(demoData));
+      }
+      updateSubmissionCount();
+    }
+
+    function getSubmissions() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveSubmissions(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      updateSubmissionCount();
+    }
+
+    function updateSubmissionCount() {
+      const list = getSubmissions();
+      document.getElementById('submissionCountBadge').textContent = list.length;
+    }
+
+    const stepSection1 = document.getElementById('stepSection1');
+    const stepSection2 = document.getElementById('stepSection2');
+    const stepSection3 = document.getElementById('stepSection3');
+
+    const stepBadge1 = document.getElementById('stepBadge1');
+    const stepBadge2 = document.getElementById('stepBadge2');
+    const stepBadge3 = document.getElementById('stepBadge3');
+    const stepConnector1 = document.getElementById('stepConnector1');
+    const stepConnector2 = document.getElementById('stepConnector2');
+
+    function updateStepUI(step) {
+      currentStep = step;
+      // Hide all sections
+      stepSection1.classList.add('hidden');
+      stepSection2.classList.add('hidden');
+      stepSection3.classList.add('hidden');
+
+      // Reset badges
+      stepBadge1.className = 'w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-500 flex items-center justify-center text-sm font-semibold transition-all';
+      stepBadge2.className = 'w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-500 flex items-center justify-center text-sm font-semibold transition-all';
+      stepBadge3.className = 'w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-500 flex items-center justify-center text-sm font-semibold transition-all';
+      stepConnector1.className = 'w-8 sm:w-16 h-0.5 bg-slate-200';
+      stepConnector2.className = 'w-8 sm:w-16 h-0.5 bg-slate-200';
+
+      if (step === 1) {
+        stepSection1.classList.remove('hidden');
+        stepBadge1.className = 'w-8 h-8 rounded-full border-2 border-sky-600 bg-sky-600 text-white flex items-center justify-center text-sm font-semibold shadow-md shadow-sky-500/30';
+      } else if (step === 2) {
+        stepSection2.classList.remove('hidden');
+        stepBadge1.className = 'w-8 h-8 rounded-full border-2 border-emerald-500 bg-emerald-500 text-white flex items-center justify-center text-sm font-semibold';
+        stepConnector1.className = 'w-8 sm:w-16 h-0.5 bg-emerald-500';
+        stepBadge2.className = 'w-8 h-8 rounded-full border-2 border-sky-600 bg-sky-600 text-white flex items-center justify-center text-sm font-semibold shadow-md shadow-sky-500/30';
+      } else if (step === 3) {
+        stepSection3.classList.remove('hidden');
+        stepBadge1.className = 'w-8 h-8 rounded-full border-2 border-emerald-500 bg-emerald-500 text-white flex items-center justify-center text-sm font-semibold';
+        stepBadge2.className = 'w-8 h-8 rounded-full border-2 border-emerald-500 bg-emerald-500 text-white flex items-center justify-center text-sm font-semibold';
+        stepConnector1.className = 'w-8 sm:w-16 h-0.5 bg-emerald-500';
+        stepConnector2.className = 'w-8 sm:w-16 h-0.5 bg-emerald-500';
+        stepBadge3.className = 'w-8 h-8 rounded-full border-2 border-sky-600 bg-sky-600 text-white flex items-center justify-center text-sm font-semibold shadow-md shadow-sky-500/30';
+      }
+
+      // Smooth scroll back to form top
+      window.scrollTo({ top: document.getElementById('endUserForm').offsetTop - 80, behavior: 'smooth' });
+    }
+
+    // Phone format auto-dash
+    const phoneInput = document.getElementById('phoneNumber');
+    phoneInput.addEventListener('input', function(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length > 10) val = val.substring(0, 10);
+      if (val.length > 6) {
+        e.target.value = val.replace(/(\d{3})(\d{3})(\d{1,4})/, '$1-$2-$3');
+      } else if (val.length > 3) {
+        e.target.value = val.replace(/(\d{3})(\d{1,3})/, '$1-$2');
+      } else {
+        e.target.value = val;
+      }
+    });
+
+    // Step 1 Validation & Next
+    document.getElementById('btnNext1').addEventListener('click', () => {
+      const name = document.getElementById('fullName').value.trim();
+      const phone = document.getElementById('phoneNumber').value.trim().replace(/\D/g, '');
+      const province = document.getElementById('installProvince').value;
+
+      let valid = true;
+      if (!name) {
+        document.getElementById('err-fullName').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('err-fullName').classList.add('hidden');
+      }
+
+      if (phone.length < 9) {
+        document.getElementById('err-phoneNumber').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('err-phoneNumber').classList.add('hidden');
+      }
+
+      if (!province) {
+        showToast('⚠️ กรุณาเลือกจังหวัดที่ติดตั้ง');
+        valid = false;
+      }
+
+      if (valid) {
+        updateStepUI(2);
+      }
+    });
+
+    const storeButtons = document.querySelectorAll('.store-type-btn');
+    storeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        storeButtons.forEach(b => {
+          b.classList.remove('border-sky-500', 'bg-sky-50', 'ring-2', 'ring-sky-200');
+          b.classList.add('border-slate-200', 'bg-slate-50');
+        });
+        btn.classList.add('border-sky-500', 'bg-sky-50', 'ring-2', 'ring-sky-200');
+        btn.classList.remove('border-slate-200', 'bg-slate-50');
+        selectedStoreType = btn.getAttribute('data-store-type');
+        document.getElementById('purchaseStoreType').value = selectedStoreType;
+        document.getElementById('err-purchaseStoreType').classList.add('hidden');
+      });
+    });
+
+    document.getElementById('btnBack2').addEventListener('click', () => updateStepUI(1));
+
+    document.getElementById('btnNext2').addEventListener('click', () => {
+      const brand = document.getElementById('acBrandModel').value.trim();
+      const btu = document.getElementById('acBtu').value;
+      const date = document.getElementById('purchaseDate').value;
+      const storeType = document.getElementById('purchaseStoreType').value;
+      const storeDetail = document.getElementById('purchaseLocationDetail').value.trim();
+
+      let valid = true;
+      if (!brand) {
+        document.getElementById('err-acBrandModel').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('err-acBrandModel').classList.add('hidden');
+      }
+
+      if (!btu) {
+        showToast('⚠️ กรุณาเลือกขนาด BTU');
+        valid = false;
+      }
+
+      if (!date) {
+        document.getElementById('err-purchaseDate').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('err-purchaseDate').classList.add('hidden');
+      }
+
+      if (!storeType) {
+        document.getElementById('err-purchaseStoreType').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('err-purchaseStoreType').classList.add('hidden');
+      }
+
+      if (!storeDetail) {
+        document.getElementById('err-purchaseLocationDetail').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('err-purchaseLocationDetail').classList.add('hidden');
+      }
+
+      if (valid) {
+        updateStepUI(3);
+      }
+    });
+
+    document.getElementById('btnBack3').addEventListener('click', () => updateStepUI(2));
+
+    // Interactive highlight on checkbox click
+    const reasonCards = document.querySelectorAll('.reason-card');
+    reasonCards.forEach(card => {
+      const chk = card.querySelector('input[type="checkbox"]');
+      chk.addEventListener('change', () => {
+        if (chk.checked) {
+          card.classList.add('border-sky-500', 'bg-sky-50/70', 'ring-1', 'ring-sky-300');
+          card.classList.remove('border-slate-200', 'bg-slate-50/50');
+        } else {
+          card.classList.remove('border-sky-500', 'bg-sky-50/70', 'ring-1', 'ring-sky-300');
+          card.classList.add('border-slate-200', 'bg-slate-50/50');
+        }
+      });
+    });
+
+    // Form Submit handler
+    const form = document.getElementById('endUserForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Check at least 1 reason selected
+      const checkedReasons = Array.from(document.querySelectorAll('input[name="purchaseReasons"]:checked')).map(cb => cb.value);
+      if (checkedReasons.length === 0) {
+        document.getElementById('err-purchaseReasons').classList.remove('hidden');
+        showToast('⚠️ กรุณาเลือกเหตุผลการตัดสินใจอย่างน้อย 1 ข้อ');
+        return;
+      } else {
+        document.getElementById('err-purchaseReasons').classList.add('hidden');
+      }
+
+      const pdpa = document.getElementById('pdpaConsent').checked;
+      if (!pdpa) {
+        document.getElementById('err-pdpaConsent').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('err-pdpaConsent').classList.add('hidden');
+      }
+
+      // Collect complete payload
+      const regId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
+      const newEntry = {
+        id: regId,
+        timestamp: new Date().toLocaleString('th-TH'),
+        fullName: document.getElementById('fullName').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim(),
+        email: document.getElementById('email').value.trim() || 'ไม่ได้ระบุ',
+        installProvince: document.getElementById('installProvince').value,
+        acBrandModel: document.getElementById('acBrandModel').value.trim(),
+        acBtu: document.getElementById('acBtu').value,
+        purchaseDate: document.getElementById('purchaseDate').value,
+        serialNumber: document.getElementById('serialNumber').value.trim() || 'Auto-Registered',
+        purchaseStoreType: document.getElementById('purchaseStoreType').value,
+        purchaseLocationDetail: document.getElementById('purchaseLocationDetail').value.trim(),
+        purchaseReasons: checkedReasons,
+        otherFeedback: document.getElementById('otherFeedback').value.trim() || '-'
+      };
+
+      // Save to LocalStorage
+      const list = getSubmissions();
+      list.unshift(newEntry);
+      saveSubmissions(list);
+
+      // Populate Digital Warranty Card
+      document.getElementById('certBrandModel').textContent = newEntry.acBrandModel + ' (' + newEntry.acBtu.split(' ')[0] + ')';
+      document.getElementById('certOwnerName').textContent = newEntry.fullName;
+      document.getElementById('certPhone').textContent = newEntry.phoneNumber;
+      document.getElementById('certStore').textContent = newEntry.purchaseLocationDetail;
+      document.getElementById('certRegId').textContent = regId;
+
+      // Show Success Modal
+      document.getElementById('successModal').classList.remove('hidden');
+      showToast('🎉 บันทึกข้อมูลและออกใบรับประกันสำเร็จ!');
+
+      // Reset form
+      form.reset();
+      reasonCards.forEach(c => {
+        c.classList.remove('border-sky-500', 'bg-sky-50/70', 'ring-1', 'ring-sky-300');
+        c.classList.add('border-slate-200', 'bg-slate-50/50');
+      });
+      storeButtons.forEach(b => {
+        b.classList.remove('border-sky-500', 'bg-sky-50', 'ring-2', 'ring-sky-200');
+        b.classList.add('border-slate-200', 'bg-slate-50');
+      });
+      updateStepUI(1);
+    });
+
+    // Toast helper
+    function showToast(text, icon = '✨') {
+      const toast = document.getElementById('toastMessage');
+      document.getElementById('toastText').textContent = text;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    // Modal controllers
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('successModal').classList.add('hidden');
+    });
+
+    document.getElementById('viewDataDirectBtn').addEventListener('click', () => {
+      document.getElementById('successModal').classList.add('hidden');
+      openRecordsModal();
+    });
+
+    document.getElementById('viewRecordsBtn').addEventListener('click', openRecordsModal);
+    document.getElementById('closeRecordsModalBtn').addEventListener('click', () => {
+      document.getElementById('recordsModal').classList.add('hidden');
+    });
+
+    function openRecordsModal() {
+      renderRecordsTable();
+      document.getElementById('recordsModal').classList.remove('hidden');
+    }
+
+    function renderRecordsTable() {
+      const records = getSubmissions();
+      const tbody = document.getElementById('recordsTableBody');
+      const emptyState = document.getElementById('noRecordsState');
+
+      document.getElementById('statTotalUsers').textContent = records.length;
+
+      if (records.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        document.getElementById('statTopReason').textContent = '-';
+        document.getElementById('statTopChannel').textContent = '-';
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      // Calculate stats
+      const reasonCount = {};
+      const channelCount = {};
+
+      records.forEach(r => {
+        if (Array.isArray(r.purchaseReasons)) {
+          r.purchaseReasons.forEach(rs => {
+            const shortName = rs.split('/')[0].trim();
+            reasonCount[shortName] = (reasonCount[shortName] || 0) + 1;
+          });
+        }
+        if (r.purchaseStoreType) {
+          const shortChannel = r.purchaseStoreType.split('(')[0].trim();
+          channelCount[shortChannel] = (channelCount[shortChannel] || 0) + 1;
+        }
+      });
+
+      const topReason = Object.entries(reasonCount).sort((a,b) => b[1] - a[1])[0];
+      const topChannel = Object.entries(channelCount).sort((a,b) => b[1] - a[1])[0];
+
+      document.getElementById('statTopReason').textContent = topReason ? topReason[0] : '-';
+      document.getElementById('statTopChannel').textContent = topChannel ? topChannel[0] : '-';
+
+      // Render Rows
+      tbody.innerHTML = records.map(r => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 text-slate-500 whitespace-nowrap">
+            <div class="font-mono text-[11px] font-semibold text-slate-700">${r.id}</div>
+            <div class="text-[10px] text-slate-400">${r.timestamp}</div>
+          </td>
+          <td class="p-3">
+            <div class="font-semibold text-slate-900">${r.fullName}</div>
+            <div class="text-sky-600 font-mono text-[11px]">${r.phoneNumber}</div>
+            <div class="text-slate-400 text-[10px]">${r.installProvince}</div>
+          </td>
+          <td class="p-3">
+            <div class="font-medium text-slate-800">${r.acBrandModel}</div>
+            <div class="text-slate-500 text-[11px]">${r.acBtu ? r.acBtu.split('(')[0] : '-'}</div>
+            <div class="text-slate-400 text-[10px]">ซื้อเมื่อ: ${r.purchaseDate}</div>
+          </td>
+          <td class="p-3 max-w-[200px]">
+            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 mb-1">
+              ${r.purchaseStoreType.split('(')[0]}
+            </span>
+            <div class="text-slate-800 font-medium text-[11px] truncate" title="${r.purchaseLocationDetail}">
+              ${r.purchaseLocationDetail}
+            </div>
+          </td>
+          <td class="p-3 max-w-[240px]">
+            <div class="flex flex-wrap gap-1">
+              ${(r.purchaseReasons || []).map(reason => `
+                <span class="px-1.5 py-0.5 rounded text-[10px] bg-sky-50 text-sky-700 border border-sky-100">
+                  ${reason.split('/')[0]}
+                </span>
+              `).join('')}
+            </div>
+            ${r.otherFeedback && r.otherFeedback !== '-' ? `
+              <div class="mt-1 text-[10px] text-slate-500 italic truncate" title="${r.otherFeedback}">
+                "${r.otherFeedback}"
+              </div>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Clear all records with custom prompt
+    document.getElementById('clearRecordsBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      renderRecordsTable();
+      updateSubmissionCount();
+      showToast('🗑️ ล้างข้อมูลเรียบร้อยแล้ว');
+    });
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeDemoData();
+    });
+  </script>
+</body>
+</html>
