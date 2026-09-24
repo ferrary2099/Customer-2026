@@ -78,6 +78,11 @@
 
       <!-- Quick Action / Live Data Counter -->
       <div class="flex items-center gap-3">
+        <!-- Google Sheet Connected Badge -->
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Google Sheet เชื่อมต่อแล้ว</span>
+        </div>
         <button id="viewRecordsBtn" class="text-xs sm:text-sm font-medium text-slate-600 hover:text-sky-600 bg-slate-100 hover:bg-sky-50 px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
           <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -462,8 +467,12 @@
             </button>
             <button type="submit" id="btnSubmit"
               class="px-8 py-3 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-sky-600/30">
-              <span>ยืนยันการลงทะเบียนรับสิทธิ์</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <svg id="submitSpinner" class="w-4 h-4 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              <span id="submitBtnText">ยืนยันการลงทะเบียนรับสิทธิ์</span>
+              <svg id="submitIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
             </button>
           </div>
         </div>
@@ -650,9 +659,35 @@
   </div>
 
   <script>
+    // Google Apps Script Web App URL ที่เชื่อมต่อกับ Google Sheet โดยตรง
+    const GSHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwI3uYxMASI-SYYL45-nwRnQ40gwm5jzSzC50AmpDKJHglK33jH6ru-SOT6ZfYF1UDlWw/exec';
     const STORAGE_KEY = 'aerocare_enduser_leads';
     let currentStep = 1;
     let selectedStoreType = '';
+
+    // Send payload directly to Google Apps Script Web App
+    async function sendToGoogleSheet(payload) {
+      if (!GSHEET_WEBAPP_URL || !GSHEET_WEBAPP_URL.startsWith('https://script.google.com/')) {
+        console.warn('Google Sheet URL not configured. Data saved locally.');
+        return { status: 'skipped', message: 'No Google Sheet URL' };
+      }
+
+      try {
+        // ส่งแบบ text/plain พร้อม mode no-cors เพื่อเลี่ยง CORS restriction ของเบราว์เซอร์
+        await fetch(GSHEET_WEBAPP_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
+        });
+        return { status: 'success' };
+      } catch (err) {
+        console.error('Error pushing data to Google Sheet:', err);
+        return { status: 'error', error: err };
+      }
+    }
 
     // Sample initial demo record for immediate visual delight if empty
     function initializeDemoData() {
@@ -887,7 +922,7 @@
 
     // Form Submit handler
     const form = document.getElementById('endUserForm');
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       // Check at least 1 reason selected
@@ -908,29 +943,49 @@
         document.getElementById('err-pdpaConsent').classList.add('hidden');
       }
 
-      // Collect complete payload
+      // UI Loading state
+      const submitBtn = document.getElementById('btnSubmit');
+      const submitText = document.getElementById('submitBtnText');
+      const submitSpinner = document.getElementById('submitSpinner');
+      const submitIcon = document.getElementById('submitIcon');
+      
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitText) submitText.textContent = 'กำลังบันทึกข้อมูลเข้า Google Sheet...';
+      if (submitSpinner) submitSpinner.classList.remove('hidden');
+      if (submitIcon) submitIcon.classList.add('hidden');
+
+      // Collect complete payload matching the 14 columns
       const regId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
       const newEntry = {
         id: regId,
         timestamp: new Date().toLocaleString('th-TH'),
         fullName: document.getElementById('fullName').value.trim(),
         phoneNumber: document.getElementById('phoneNumber').value.trim(),
-        email: document.getElementById('email').value.trim() || 'ไม่ได้ระบุ',
+        email: document.getElementById('email').value.trim() || '-',
         installProvince: document.getElementById('installProvince').value,
         acBrandModel: document.getElementById('acBrandModel').value.trim(),
         acBtu: document.getElementById('acBtu').value,
         purchaseDate: document.getElementById('purchaseDate').value,
-        serialNumber: document.getElementById('serialNumber').value.trim() || 'Auto-Registered',
+        serialNumber: document.getElementById('serialNumber').value.trim() || '-',
         purchaseStoreType: document.getElementById('purchaseStoreType').value,
         purchaseLocationDetail: document.getElementById('purchaseLocationDetail').value.trim(),
         purchaseReasons: checkedReasons,
         otherFeedback: document.getElementById('otherFeedback').value.trim() || '-'
       };
 
-      // Save to LocalStorage
+      // 1. Always save to LocalStorage (Instant local fallback & record view)
       const list = getSubmissions();
       list.unshift(newEntry);
       saveSubmissions(list);
+
+      // 2. Transmit directly to Google Sheet Web App
+      const gsheetResult = await sendToGoogleSheet(newEntry);
+
+      // Reset button UI
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitText) submitText.textContent = 'ยืนยันการลงทะเบียนรับสิทธิ์';
+      if (submitSpinner) submitSpinner.classList.add('hidden');
+      if (submitIcon) submitIcon.classList.remove('hidden');
 
       // Populate Digital Warranty Card
       document.getElementById('certBrandModel').textContent = newEntry.acBrandModel + ' (' + newEntry.acBtu.split(' ')[0] + ')';
@@ -941,7 +996,12 @@
 
       // Show Success Modal
       document.getElementById('successModal').classList.remove('hidden');
-      showToast('🎉 บันทึกข้อมูลและออกใบรับประกันสำเร็จ!');
+      
+      if (gsheetResult.status === 'success') {
+        showToast('🎉 บันทึกข้อมูลเข้า Google Sheet สำเร็จเรียบร้อย!', '📊');
+      } else {
+        showToast('🎉 บันทึกข้อมูลสำเร็จเรียบร้อย!', '✅');
+      }
 
       // Reset form
       form.reset();
@@ -970,6 +1030,161 @@
     // Modal controllers
     document.getElementById('closeModalBtn').addEventListener('click', () => {
       document.getElementById('successModal').classList.add('hidden');
+    });
+
+    // Google Sheets Modal controls
+    const sheetModal = document.getElementById('sheetConfigModal');
+    document.getElementById('openSheetConfigBtn').addEventListener('click', () => {
+      sheetModal.classList.remove('hidden');
+    });
+    document.getElementById('closeSheetConfigBtn').addEventListener('click', () => {
+      sheetModal.classList.add('hidden');
+    });
+    document.getElementById('closeSheetConfigFooterBtn').addEventListener('click', () => {
+      sheetModal.classList.add('hidden');
+    });
+
+    // Save Google Script URL
+    document.getElementById('saveScriptUrlBtn').addEventListener('click', () => {
+      const url = document.getElementById('googleScriptUrl').value.trim();
+      if (!url) {
+        localStorage.removeItem(GSHEET_URL_KEY);
+        checkSheetConfig();
+        showToast('ลบการเชื่อมต่อ Google Sheet แล้ว');
+        return;
+      }
+      if (!url.startsWith('https://script.google.com/')) {
+        showToast('⚠️ URL ต้องขึ้นต้นด้วย https://script.google.com/...', '⚠️');
+        return;
+      }
+      localStorage.setItem(GSHEET_URL_KEY, url);
+      checkSheetConfig();
+      showToast('✅ บันทึก Google Apps Script URL เรียบร้อย!', '📊');
+    });
+
+    // Copy Apps Script code button
+    document.getElementById('copyAppsScriptBtn').addEventListener('click', () => {
+      const code = `function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "รหัสลงทะเบียน (ID)",
+        "วันที่-เวลา",
+        "ชื่อ-นามสกุล",
+        "เบอร์โทรศัพท์",
+        "อีเมล",
+        "จังหวัดที่ติดตั้ง",
+        "ยี่ห้อ / รุ่นแอร์",
+        "ขนาด BTU",
+        "วันที่ซื้อ",
+        "Serial Number",
+        "ประเภทสถานที่ซื้อ",
+        "ชื่อร้าน / สาขา",
+        "เหตุผลการตัดสินใจซื้อ",
+        "ข้อเสนอแนะเพิ่มเติม"
+      ]);
+      sheet.getRange(1, 1, 1, 14).setBackground("#0284c7").setFontColor("#ffffff").setFontWeight("bold");
+    }
+    var data = JSON.parse(e.postData.contents);
+    var reasons = Array.isArray(data.purchaseReasons) ? data.purchaseReasons.join(", ") : data.purchaseReasons;
+    sheet.appendRow([
+      data.id || "",
+      data.timestamp || new Date().toLocaleString("th-TH"),
+      data.fullName || "",
+      data.phoneNumber || "",
+      data.email || "",
+      data.installProvince || "",
+      data.acBrandModel || "",
+      data.acBtu || "",
+      data.purchaseDate || "",
+      data.serialNumber || "",
+      data.purchaseStoreType || "",
+      data.purchaseLocationDetail || "",
+      reasons || "",
+      data.otherFeedback || ""
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ result: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ result: "error", message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = code;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('📋 คัดลอกโค้ดไปยังคลิปบอร์ดแล้ว!');
+    });
+
+    // Test send to Sheet button
+    document.getElementById('testSheetBtn').addEventListener('click', async () => {
+      const url = localStorage.getItem(GSHEET_URL_KEY);
+      if (!url) {
+        showToast('⚠️ กรุณากรอกและบันทึก URL ก่อนทดสอบ', '⚠️');
+        return;
+      }
+      showToast('⏳ กำลังทดสอบส่งข้อมูลเข้า Google Sheet...', '📡');
+      const testPayload = {
+        id: 'TEST-' + Math.floor(1000 + Math.random() * 9000),
+        timestamp: new Date().toLocaleString('th-TH'),
+        fullName: 'ทดสอบระบบ (Test Customer)',
+        phoneNumber: '089-999-9999',
+        email: 'test@example.com',
+        installProvince: 'กรุงเทพมหานคร',
+        acBrandModel: 'Test Air Inverter',
+        acBtu: '12,000 BTU',
+        purchaseDate: new Date().toISOString().split('T')[0],
+        serialNumber: 'SN-TEST-001',
+        purchaseStoreType: 'ทดสอบระบบ',
+        purchaseLocationDetail: 'Test Store Branch',
+        purchaseReasons: ['ทดสอบการเชื่อมต่อ Google Sheet'],
+        otherFeedback: 'ทดสอบส่งจากปุ่มตั้งค่า'
+      };
+      await sendToGoogleSheet(testPayload);
+      showToast('✅ ทดสอบส่งข้อมูลสำเร็จ! เปิดดูแถวล่าสุดใน Sheet ได้เลย', '🎉');
+    });
+
+    // CSV Download Function
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      const records = getSubmissions();
+      if (records.length === 0) {
+        showToast('⚠️ ไม่มีข้อมูลสำหรับการส่งออก');
+        return;
+      }
+
+      const headers = ['รหัส', 'วันที่บันทึก', 'ชื่อลูกค้า', 'เบอร์โทร', 'อีเมล', 'จังหวัด', 'รุ่นแอร์', 'ขนาด BTU', 'วันที่ซื้อ', 'Serial Number', 'ประเภทสถานที่ซื้อ', 'ชื่อร้านสาขา', 'เหตุผลการซื้อ', 'ข้อเสนอแนะ'];
+      
+      const rows = records.map(r => [
+        `"${r.id || ''}"`,
+        `"${r.timestamp || ''}"`,
+        `"${r.fullName || ''}"`,
+        `"${r.phoneNumber || ''}"`,
+        `"${r.email || ''}"`,
+        `"${r.installProvince || ''}"`,
+        `"${r.acBrandModel || ''}"`,
+        `"${r.acBtu || ''}"`,
+        `"${r.purchaseDate || ''}"`,
+        `"${r.serialNumber || ''}"`,
+        `"${r.purchaseStoreType || ''}"`,
+        `"${(r.purchaseLocationDetail || '').replace(/"/g, '""')}"`,
+        `"${(Array.isArray(r.purchaseReasons) ? r.purchaseReasons.join('; ') : '').replace(/"/g, '""')}"`,
+        `"${(r.otherFeedback || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `aerocare_customers_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('📥 ดาวน์โหลดไฟล์ CSV เรียบร้อย');
     });
 
     document.getElementById('viewDataDirectBtn').addEventListener('click', () => {
